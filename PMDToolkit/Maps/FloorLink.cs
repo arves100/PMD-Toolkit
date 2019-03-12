@@ -29,7 +29,7 @@ using System.Text;
 
 namespace PMDToolkit.Maps
 {
-    public struct FloorLink
+    public struct FloorLink : IEquatable<FloorLink>
     {
         public int FloorNum;
         public int EntranceIndex;
@@ -40,14 +40,33 @@ namespace PMDToolkit.Maps
             EntranceIndex = entranceIndex;
         }
 
+        public override bool Equals(object obj)
+        {
+            return obj is FloorLink && Equals((FloorLink)obj);
+        }
+
+        public bool Equals(FloorLink other)
+        {
+            return FloorNum == other.FloorNum &&
+                   EntranceIndex == other.EntranceIndex;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = 1727950620;
+            hashCode = hashCode * -1521134295 + FloorNum.GetHashCode();
+            hashCode = hashCode * -1521134295 + EntranceIndex.GetHashCode();
+            return hashCode;
+        }
+
         public static bool operator ==(FloorLink link1, FloorLink link2)
         {
-            return ((link1.FloorNum == link2.FloorNum) && (link1.EntranceIndex == link2.EntranceIndex));
+            return link1.Equals(link2);
         }
 
         public static bool operator !=(FloorLink link1, FloorLink link2)
         {
-            return !((link1.FloorNum == link2.FloorNum) && (link1.EntranceIndex == link2.EntranceIndex));
+            return link1.Equals(link2);
         }
     }
 }

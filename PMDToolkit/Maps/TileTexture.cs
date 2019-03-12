@@ -24,11 +24,10 @@ THE SOFTWARE.
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace PMDToolkit.Maps {
-    public struct TileTexture {
+    public struct TileTexture : IEquatable<TileTexture>
+    {
 
         public Loc2D Texture;
         public int Sheet;
@@ -39,14 +38,24 @@ namespace PMDToolkit.Maps {
             Sheet = sheet;
         }
 
+        public override bool Equals(object obj)
+        {
+            return obj is TileTexture && Equals((TileTexture)obj);
+        }
+
+        public bool Equals(TileTexture tileTexture)
+        {
+            return (Texture == tileTexture.Texture && Sheet == tileTexture.Sheet);
+        }
+
         public static bool operator ==(TileTexture param1, TileTexture param2)
         {
-            return (param1.Texture == param2.Texture && param1.Sheet == param2.Sheet);
+            return param1.Equals(param2);
         }
 
         public static bool operator !=(TileTexture param1, TileTexture param2)
         {
-            return !(param1 == param2);
+            return !param1.Equals(param2);
         }
 
         public void Draw() {
@@ -54,5 +63,12 @@ namespace PMDToolkit.Maps {
             texture.Render(null);
         }
 
+        public override int GetHashCode()
+        {
+            var hashCode = 1607062268;
+            hashCode = hashCode * -1521134295 + EqualityComparer<Loc2D>.Default.GetHashCode(Texture);
+            hashCode = hashCode * -1521134295 + Sheet.GetHashCode();
+            return hashCode;
+        }
     }
 }

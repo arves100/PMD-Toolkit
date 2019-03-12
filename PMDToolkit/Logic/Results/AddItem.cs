@@ -30,7 +30,6 @@ using PMDToolkit.Maps;
 using PMDToolkit.Logic.Gameplay;
 using PMDToolkit.Logic.Display;
 using PMDToolkit.Graphics;
-using PMDToolkit.Graphics;
 
 namespace PMDToolkit.Logic.Results {
     public class AddItem : IResult {

@@ -60,15 +60,12 @@ namespace PMDToolkit.Logic.Gameplay {
                 case Enums.Alignment.Self: {
                         return hitSelf;
                     }
-                    break;
                 case Enums.Alignment.Friend: {
                         return hitFriend;
                     }
-                    break;
                 case Enums.Alignment.Foe: {
                         return hitFoe;
                     }
-                    break;
             }
             return false;
         }
@@ -227,18 +224,18 @@ namespace PMDToolkit.Logic.Gameplay {
                 case Enums.RangeType.FrontUntil: {//foe in front until
                     #region FrontOfUserUntil
                         Loc2D targetLoc = userLoc;
-                        bool stopattile = false;
+                        //bool stopattile = false;
                         for (int r = 0; r <= range.Distance; r++) {
                             for (int i = 0; i < MAX_TEAM_SLOTS; i++) {
                                 if (IsTargeted(user, Players[i], range.HitsSelf, range.HitsFriend, range.HitsFoe) && targetLoc == Players[i].CharLoc) {
                                     targetlist.Add(new Target(Players[i], GetMatchup(user, Players[i]), r));
-                                    stopattile = true;
+                                    //stopattile = true;
                                 }
                             }
                             for (int i = 0; i < BasicMap.MAX_NPC_SLOTS; i++) {
                                 if (IsTargeted(user, Npcs[i], range.HitsSelf, range.HitsFriend, range.HitsFoe) && targetLoc == Npcs[i].CharLoc) {
                                     targetlist.Add(new Target(Npcs[i], GetMatchup(user, Npcs[i]), r));
-                                    stopattile = true;
+                                    //stopattile = true;
                                 }
                             }
 

@@ -11,8 +11,8 @@ namespace PMDToolkit.Editors
 {
     public partial class MapResizeWindow : Form
     {
-        public int Width { get; set; }
-        public int Height { get; set; }
+        /*public int Width { get; set; }
+        public int Height { get; set; }*/
 
         public Maps.Direction8 ResizeDir { get; set; }
 

@@ -75,7 +75,7 @@ namespace PMDToolkit.Maps.Floors {
             //TODO: make sure that this algorithm follows floorBorders and borderLinks constraints
 
             this.seed = seed;
-            this.entry = entry;
+            //this.entry = entry;
             FloorBorders = null;
             BorderLinks = null;
 

@@ -435,7 +435,9 @@ namespace PMDToolkit.Logic.Gameplay {
             Command command = new Command(Command.CommandType.None);
 
             bool jump = false;
+#if GAME_MODE
             bool spell = false;
+#endif
             bool turn = false;
             bool diagonal = false;
             
@@ -461,7 +463,9 @@ namespace PMDToolkit.Logic.Gameplay {
                     command = new Logic.Gameplay.Command(Logic.Gameplay.Command.CommandType.Spell, 3);
                 } else {
                     //keep move display
+#if GAME_MODE
                     spell = true;
+#endif
                     if (CurrentInput.Direction != Direction8.None) {
                         command = new Command(Command.CommandType.Dir);
                         command.AddArg((int)CurrentInput.Direction);
@@ -560,7 +564,7 @@ namespace PMDToolkit.Logic.Gameplay {
                         //Display.Screen.ResultList.Add(new Results.EndTag());
                     }
                     break;
-                    #if GAME_MODE
+#if GAME_MODE
                     case Command.CommandType.Attack: {
                         Display.Screen.BeginConcurrent();
                         //takes a dir argument

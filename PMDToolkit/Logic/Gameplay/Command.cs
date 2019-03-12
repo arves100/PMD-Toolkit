@@ -24,11 +24,10 @@ THE SOFTWARE.
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace PMDToolkit.Logic.Gameplay {
-    public struct Command {
+    public struct Command : IEquatable<Command>
+    {
 
         public enum CommandType {
             None = -1,
@@ -70,18 +69,38 @@ namespace PMDToolkit.Logic.Gameplay {
             args.Add(arg);
         }
 
-        public static bool operator ==(Command command1, Command command2) {
-            if (command1.Type != command2.Type) return false;
-            if(command1.ArgCount != command2.ArgCount) return false;
-            for (int i = 0; i < command1.ArgCount; i++) {
-                if (command1[i] != command2[i]) return false;
+        public override bool Equals(object obj)
+        {
+            return obj is Command && Equals((Command)obj);
+        }
+
+        public bool Equals(Command other)
+        {
+            if (Type != other.Type) return false;
+            if (ArgCount != other.ArgCount) return false;
+            for (int i = 0; i < other.ArgCount; i++)
+            {
+                if (this[i] != other[i]) return false;
             }
 
             return true;
         }
 
+        public override int GetHashCode()
+        {
+            var hashCode = -335884425;
+            hashCode = hashCode * -1521134295 + Type.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<List<int>>.Default.GetHashCode(args);
+            hashCode = hashCode * -1521134295 + ArgCount.GetHashCode();
+            return hashCode;
+        }
+
+        public static bool operator ==(Command command1, Command command2) {
+            return command1.Equals(command2);
+        }
+
         public static bool operator !=(Command command1, Command command2) {
-            return !(command1 == command2);
+            return !command1.Equals(command2);
         }
     }
 }

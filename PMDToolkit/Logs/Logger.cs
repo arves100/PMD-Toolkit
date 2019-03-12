@@ -24,8 +24,6 @@ THE SOFTWARE.
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using System.Xml;
 
@@ -35,7 +33,10 @@ namespace PMDToolkit.Logs {
         static object lockObj = new object();
 
         private static List<string> battleLog;
+
+#if GAME_MODE
         private static DateTime journeyStart;
+#endif
 
         public static XmlWriterSettings XmlWriterSettings { get; private set; }
 

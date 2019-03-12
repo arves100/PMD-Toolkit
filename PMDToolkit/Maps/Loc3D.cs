@@ -28,7 +28,8 @@ using System.Linq;
 using System.Text;
 
 namespace PMDToolkit.Maps {
-    public struct Loc3D {
+    public struct Loc3D : IEquatable<Loc3D>
+    {
 
         public int X;
         public int Y;
@@ -50,12 +51,33 @@ namespace PMDToolkit.Maps {
             return new Loc2D(X, Y);
         }
 
+        public override bool Equals(object obj)
+        {
+            return obj is Loc3D && Equals((Loc3D)obj);
+        }
+
+        public bool Equals(Loc3D other)
+        {
+            return X == other.X &&
+                   Y == other.Y &&
+                   Z == other.Z;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = -307843816;
+            hashCode = hashCode * -1521134295 + X.GetHashCode();
+            hashCode = hashCode * -1521134295 + Y.GetHashCode();
+            hashCode = hashCode * -1521134295 + Z.GetHashCode();
+            return hashCode;
+        }
+
         public static bool operator ==(Loc3D param1, Loc3D param2) {
-            return (param1.X == param2.X && param1.Y == param2.Y && param1.Z == param2.Z);
+            return param1.Equals(param2);
         }
 
         public static bool operator !=(Loc3D param1, Loc3D param2) {
-            return !(param1 == param2);
+            return !param1.Equals(param2);
         }
 
 

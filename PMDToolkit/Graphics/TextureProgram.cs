@@ -79,8 +79,10 @@ namespace PMDToolkit.Graphics {
 	        GL.LinkProgram( mProgramID );
 	        //Check for errors
             int status_code;
-            GL.GetProgram(mProgramID, ProgramParameter.LinkStatus, out status_code);
-	        if( status_code != 1 ) {
+
+            GL.GetProgram(mProgramID, GetProgramParameterName.LinkStatus, out status_code);
+
+            if ( status_code != 1 ) {
 		        string log = printProgramLog( mProgramID );
 		        GL.DeleteProgram( mProgramID );
                 mProgramID = 0;

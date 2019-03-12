@@ -29,7 +29,7 @@ using System.Text;
 
 namespace PMDToolkit.Graphics
 {
-    public struct RenderTime
+    public struct RenderTime : IEquatable<RenderTime>
     {
         public int Ticks;
 
@@ -46,6 +46,21 @@ namespace PMDToolkit.Graphics
         public static RenderTime FromMillisecs(int millisecs)
         {
             return new RenderTime(millisecs * TextureManager.FPS_CAP);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is RenderTime && Equals((RenderTime)obj);
+        }
+
+        public bool Equals(RenderTime other)
+        {
+            return Ticks == other.Ticks;
+        }
+
+        public override int GetHashCode()
+        {
+            return 1099527005 + Ticks.GetHashCode();
         }
 
         public static RenderTime Zero
@@ -76,12 +91,12 @@ namespace PMDToolkit.Graphics
 
         public static bool operator ==(RenderTime param1, RenderTime param2)
         {
-            return (param1.Ticks == param2.Ticks);
+            return param1.Equals(param2);
         }
 
         public static bool operator !=(RenderTime param1, RenderTime param2)
         {
-            return !(param1 == param2);
+            return !param1.Equals(param2);
         }
 
         public static RenderTime operator +(RenderTime param1, RenderTime param2)

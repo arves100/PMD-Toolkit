@@ -24,13 +24,12 @@ THE SOFTWARE.
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
 using PMDToolkit.Graphics;
 
 namespace PMDToolkit.Maps {
-    public class TileAnim {
+    public class TileAnim : IEquatable<TileAnim>
+    {
 
         public List<TileTexture> Frames;
         public RenderTime FrameLength;
@@ -93,26 +92,42 @@ namespace PMDToolkit.Maps {
             }
         }
 
-
-
-        public static bool operator ==(TileAnim param1, TileAnim param2)
+        public override bool Equals(object obj)
         {
-            if (param1.FrameLength != param2.FrameLength)
+            return Equals(obj as TileAnim);
+        }
+
+        public bool Equals(TileAnim other)
+        {
+            if (FrameLength != other.FrameLength)
                 return false;
-            if (param1.Frames.Count != param2.Frames.Count)
+            if (Frames.Count != other.Frames.Count)
                 return false;
 
-            for (int i = 0; i < param1.Frames.Count; i++)
+            for (int i = 0; i < Frames.Count; i++)
             {
-                if (param1.Frames[0] != param2.Frames[0])
+                if (Frames[0] != other.Frames[0])
                     return false;
             }
             return true;
         }
 
+        public override int GetHashCode()
+        {
+            var hashCode = -631703239;
+            hashCode = hashCode * -1521134295 + EqualityComparer<List<TileTexture>>.Default.GetHashCode(Frames);
+            hashCode = hashCode * -1521134295 + EqualityComparer<RenderTime>.Default.GetHashCode(FrameLength);
+            return hashCode;
+        }
+
+        public static bool operator ==(TileAnim param1, TileAnim param2)
+        {
+            return param1.Equals(param2);
+        }
+
         public static bool operator !=(TileAnim param1, TileAnim param2)
         {
-            return !(param1 == param2);
+            return !param1.Equals(param2);
         }
     }
 }

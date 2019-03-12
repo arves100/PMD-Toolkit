@@ -670,7 +670,7 @@ namespace PMDToolkit.Logic.Display {
                 TextureManager.TextureProgram.LeftMultModelView(Matrix4.CreateTranslation(-240, 32, 0));
                 for (int i = 0; i < Gameplay.Processor.MAX_MOVE_SLOTS; i++) {
                     TextureManager.TextureProgram.LeftMultModelView(Matrix4.CreateTranslation(0, 64, 0));
-                    Graphics.TextureManager.TextureProgram.UpdateModelView();
+                    TextureManager.TextureProgram.UpdateModelView();
 
                     if (CurrentCharMoves[i] >= 0) {
                         Data.MoveEntry moveEntry = Data.GameData.MoveDex[CurrentCharMoves[i]];
@@ -684,19 +684,19 @@ namespace PMDToolkit.Logic.Display {
             
             //draw transitions
             if (CurrentFade == FadeType.FadeIn) {
-                Graphics.TextureManager.TextureProgram.SetModelView(Matrix4.Identity);
-                Graphics.TextureManager.TextureProgram.SetTextureColor(new Color4(0, 0, 0, (byte)(FadeTime.Ticks * 255 / TOTAL_FADE_TIME.Ticks)));
-                Graphics.TextureManager.TextureProgram.LeftMultModelView(Matrix4.Scale(TextureManager.SCREEN_WIDTH, TextureManager.SCREEN_HEIGHT, 1));
-                Graphics.TextureManager.TextureProgram.UpdateModelView();
-                Graphics.TextureManager.BlankTexture.Render(null);
-                Graphics.TextureManager.TextureProgram.SetTextureColor(Color4.White);
+                TextureManager.TextureProgram.SetModelView(Matrix4.Identity);
+                TextureManager.TextureProgram.SetTextureColor(new Color4(0, 0, 0, (byte)(FadeTime.Ticks * 255 / TOTAL_FADE_TIME.Ticks)));
+                TextureManager.TextureProgram.LeftMultModelView(Matrix4.CreateScale(TextureManager.SCREEN_WIDTH, TextureManager.SCREEN_HEIGHT, 1));
+                TextureManager.TextureProgram.UpdateModelView();
+                TextureManager.BlankTexture.Render(null);
+                TextureManager.TextureProgram.SetTextureColor(Color4.White);
             } else if (CurrentFade == FadeType.FadeOut) {
-                Graphics.TextureManager.TextureProgram.SetModelView(Matrix4.Identity);
-                Graphics.TextureManager.TextureProgram.SetTextureColor(new Color4(0, 0, 0, (byte)(255 - FadeTime.Ticks * 255 / TOTAL_FADE_TIME.Ticks)));
-                Graphics.TextureManager.TextureProgram.LeftMultModelView(Matrix4.Scale(TextureManager.SCREEN_WIDTH, TextureManager.SCREEN_HEIGHT, 1));
-                Graphics.TextureManager.TextureProgram.UpdateModelView();
-                Graphics.TextureManager.BlankTexture.Render(null);
-                Graphics.TextureManager.TextureProgram.SetTextureColor(Color4.White);
+                TextureManager.TextureProgram.SetModelView(Matrix4.Identity);
+                TextureManager.TextureProgram.SetTextureColor(new Color4(0, 0, 0, (byte)(255 - FadeTime.Ticks * 255 / TOTAL_FADE_TIME.Ticks)));
+                TextureManager.TextureProgram.LeftMultModelView(Matrix4.CreateScale(TextureManager.SCREEN_WIDTH, TextureManager.SCREEN_HEIGHT, 1));
+                TextureManager.TextureProgram.UpdateModelView();
+                TextureManager.BlankTexture.Render(null);
+                TextureManager.TextureProgram.SetTextureColor(Color4.White);
             }
 
             if (ShowDebug)
