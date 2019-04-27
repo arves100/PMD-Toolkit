@@ -121,6 +121,9 @@ namespace PMDToolkit {
             MouseWheel += input.HandleMouseWheel;
             MouseDown += input.HandleMouseDown;
             MouseMove += input.HandleMouseMove;
+            KeyUp += input.HandleKeyUp;
+            MouseUp += input.HandleMouseUp;
+
             input.AreHandleBinded = true;
 
             GameLoaded = GameLoadState.Loading;
@@ -208,10 +211,12 @@ namespace PMDToolkit {
                 TextureManager.PostInit();
 
                 Logic.Gameplay.MenuManager.Init();
-                Logic.Gameplay.Processor.Init();
+                Logic.Gameplay.Processor.Init(input);
                 Logic.Display.Screen.Init();
                 Logic.Gameplay.Processor.Restart();
                 Logic.Display.Screen.ProcessTaskQueue(true);
+
+                input.ParseInput = true;
 
                 GameLoaded = GameLoadState.Loaded;
                 while (!Editors.MainPanel.EditorLoaded)
@@ -229,10 +234,12 @@ namespace PMDToolkit {
 
                     //set this frame's input
                     //Logic.Gameplay.Input input = new Logic.Gameplay.Input(Keyboard, Mouse);
-
-                    Logic.Gameplay.Processor.SetFrameInput(input, elapsedTime, (int)Math.Round(UpdateFrequency));
+    
+                    Logic.Gameplay.Processor.UpdateInput(elapsedTime, (int)Math.Round(UpdateFrequency));
 
                     Logic.Display.Screen.Process(elapsedTime);
+
+                    input.Reset();
                     errorCount--;
                 }
                 catch (Exception ex)

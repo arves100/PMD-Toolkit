@@ -69,57 +69,22 @@ namespace PMDToolkit.Logic.Gameplay {
         public bool Print { get; set; }
         public bool Restart { get; set; }
 
-        public Input() {
+        public bool ParseInput { get; set; }
+
+        public bool InputChanged { get; protected set; }
+
+        public Input()
+        {
             Direction = Direction8.None;
-        /*}
+            ParseInput = false;
+            InputChanged = false;
 
-        public Input(KeyboardDevice keyboard, MouseDevice mouse) {
-            Loc2D dirLoc = new Loc2D();
-            
-            if (keyboard[Key.Down]) {
-                Operations.MoveInDirection8(ref dirLoc, Direction8.Down, 1);
-            }
-            if (keyboard[Key.Left]) {
-                Operations.MoveInDirection8(ref dirLoc, Direction8.Left, 1);
-            }
-            if (keyboard[Key.Up]) {
-                Operations.MoveInDirection8(ref dirLoc, Direction8.Up, 1);
-            }
-            if (keyboard[Key.Right]) {
-                Operations.MoveInDirection8(ref dirLoc, Direction8.Right, 1);
-            }
-
-            Direction = Operations.GetDirection8(new Loc2D(), dirLoc);
-
-            inputStates[(int)InputType.X] = keyboard[Key.X];
-            inputStates[(int)InputType.Z] = keyboard[Key.Z];
-            inputStates[(int)InputType.C] = keyboard[Key.C];
-            inputStates[(int)InputType.A] = keyboard[Key.A];
-            inputStates[(int)InputType.S] = keyboard[Key.S];
-            inputStates[(int)InputType.D] = keyboard[Key.D];
-
-            inputStates[(int)InputType.Q] = keyboard[Key.Q];
-            inputStates[(int)InputType.W] = keyboard[Key.W];
-
-            inputStates[(int)InputType.Enter] = (keyboard[Key.Enter]);
-
-            LeftMouse = mouse[MouseButton.Left];
-            RightMouse = mouse[MouseButton.Right];
-
-            MouseWheel = mouse.Wheel;
-
-            MouseLoc = new Loc2D(mouse.X, mouse.Y);
-
-            Shift = keyboard[Key.ShiftLeft] || keyboard[Key.ShiftRight];
-
-            ShowDebug = keyboard[Key.F1];
-            SpeedDown = keyboard[Key.F2];
-            SpeedUp = keyboard[Key.F3];
-#if GAME_MODE
-            Intangible = keyboard[Key.F4];
-            Print = keyboard[Key.F5];
-            Restart = keyboard[Key.F12];
-#endif*/
+            Shift = false;
+            ShowDebug = false;
+            SpeedUp = false;
+            Intangible = false;
+            Print = false;
+            Restart = false;
         }
 
         public static bool operator ==(Input input1, Input input2) {
@@ -168,73 +133,143 @@ namespace PMDToolkit.Logic.Gameplay {
             return hashCode;
         }
 
+        public void HandleKeyUp(object sender, KeyboardKeyEventArgs e)
+        {
+            if (!ParseInput)
+                return;
+
+            switch (e.Key)
+            {
+                case Key.X:
+                    inputStates[(int)InputType.X] = false;
+                    break;
+                case Key.Z:
+                    inputStates[(int)InputType.Z] = false;
+                    break;
+                case Key.C:
+                    inputStates[(int)InputType.C] = false;
+                    break;
+                case Key.A:
+                    inputStates[(int)InputType.A] = false;
+                    break;
+                case Key.S:
+                    inputStates[(int)InputType.S] = false;
+                    break;
+                case Key.D:
+                    inputStates[(int)InputType.D] = false;
+                    break;
+                case Key.Q:
+                    inputStates[(int)InputType.Q] = false;
+                    break;
+                case Key.W:
+                    inputStates[(int)InputType.W] = false;
+                    break;
+                case Key.Enter:
+                    inputStates[(int)InputType.Enter] = false;
+                    break;
+                case Key.ShiftLeft:
+                case Key.ShiftRight:
+                    Shift = false;
+                    break;
+                case Key.F3:
+                    SpeedUp = false;
+                    break;
+                case Key.F2:
+                    SpeedDown = false;
+                    break;
+            }
+        }
+
         public void HandleKeyDown(object sender, KeyboardKeyEventArgs e)
         {
+            if (!ParseInput)
+                return;
+
             Loc2D dirLoc = new Loc2D();
 
             switch (e.Key)
             {
                 case Key.Down:
                     Operations.MoveInDirection8(ref dirLoc, Direction8.Down, 1);
+                    InputChanged = true;
                     break;
                 case Key.Up:
                     Operations.MoveInDirection8(ref dirLoc, Direction8.Up, 1);
+                    InputChanged = true;
                     break;
                 case Key.Left:
                     Operations.MoveInDirection8(ref dirLoc, Direction8.Left, 1);
+                    InputChanged = true;
                     break;
                 case Key.Right:
                     Operations.MoveInDirection8(ref dirLoc, Direction8.Right, 1);
+                    InputChanged = true;
                     break;
                 case Key.X:
                     inputStates[(int)InputType.X] = true;
+                    InputChanged = true;
                     break;
                 case Key.Z:
                     inputStates[(int)InputType.Z] = true;
+                    InputChanged = true;
                     break;
                 case Key.C:
                     inputStates[(int)InputType.C] = true;
+                    InputChanged = true;
                     break;
                 case Key.A:
                     inputStates[(int)InputType.A] = true;
+                    InputChanged = true;
                     break;
                 case Key.S:
                     inputStates[(int)InputType.S] = true;
+                    InputChanged = true;
                     break;
                 case Key.D:
                     inputStates[(int)InputType.D] = true;
+                    InputChanged = true;
                     break;
                 case Key.Q:
                     inputStates[(int)InputType.Q] = true;
+                    InputChanged = true;
                     break;
                 case Key.W:
                     inputStates[(int)InputType.W] = true;
+                    InputChanged = true;
                     break;
                 case Key.Enter:
                     inputStates[(int)InputType.Enter] = true;
+                    InputChanged = true;
                     break;
                 case Key.ShiftLeft:
                 case Key.ShiftRight:
                     Shift = true;
+                    InputChanged = true;
                     break;
                 case Key.F1:
-                    ShowDebug = true;
+                    ShowDebug = !ShowDebug;
+                    InputChanged = true;
                     break;
                 case Key.F3:
                     SpeedUp = true;
+                    InputChanged = true;
                     break;
                 case Key.F2:
                     SpeedDown = true;
+                    InputChanged = true;
                     break;
 #if GAME_MODE
                 case Key.F4:
-                    Intangible = true;
+                    Intangible = !Intangible;
+                    InputChanged = true;
                     break;
                 case Key.F5:
-                    Print = true;
+                    Print = !Print;
+                    InputChanged = true;
                     break;
                 case Key.F12:
-                    Restart = true;
+                    Restart = !Restart;
+                    InputChanged = true;
                     break;
 #endif
 
@@ -247,22 +282,60 @@ namespace PMDToolkit.Logic.Gameplay {
 
         public void HandleMouseWheel(object sender, MouseWheelEventArgs e)
         {
+            if (!ParseInput)
+                return;
+
+
             MouseWheel = e.Value;
         }
 
         public void HandleMouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (!ParseInput)
+                return;
+
             if (e.Button == MouseButton.Left)
+            {
                 LeftMouse = true;
+                InputChanged = true;
+            }
             else if (e.Button == MouseButton.Right)
+            {
                 RightMouse = true;
+                InputChanged = true;
+            }
+
+            MouseLoc = new Loc2D(e.X, e.Y);
+        }
+
+        public void HandleMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (!ParseInput)
+                return;
+
+            if (e.Button == MouseButton.Left)
+            {
+                LeftMouse = false;
+            }
+            else if (e.Button == MouseButton.Right)
+            {
+                RightMouse = false;
+            }
 
             MouseLoc = new Loc2D(e.X, e.Y);
         }
 
         public void HandleMouseMove(object sender, MouseMoveEventArgs e)
         {
+            if (!ParseInput)
+                return;
+
             MouseLoc = new Loc2D(e.X, e.Y);
+        }
+
+        public void Reset()
+        {
+            InputChanged = false;
         }
 
         public bool AreHandleBinded = false;

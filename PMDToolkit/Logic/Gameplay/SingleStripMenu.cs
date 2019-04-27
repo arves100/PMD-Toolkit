@@ -55,17 +55,17 @@ namespace PMDToolkit.Logic.Gameplay {
         }
 
         public override void Process(Input input, ActiveChar character, ref bool moveMade) {
-            if (input[Input.InputType.Enter] && !Processor.PrevInput[Input.InputType.Enter]) {
+            if (input[Input.InputType.Enter] && !Processor.InputState[(int)Processor.InputType.Enter]) {
                 Choose(character, ref moveMade);
-            } else if (input[Input.InputType.X] && !Processor.PrevInput[Input.InputType.X]) {
+            } else if (input[Input.InputType.X] && !Processor.InputState[(int)Processor.InputType.X]) {
                 Choose(character, ref moveMade);
-            } else if (input[Input.InputType.Z] && !Processor.PrevInput[Input.InputType.Z]) {
+            } else if (input[Input.InputType.Z] && !Processor.InputState[(int)Processor.InputType.Z]) {
                 MenuManager.Menus.RemoveAt(0);
             } else {
                 bool chooseDown = (input.Direction == Direction8.Down || input.Direction == Direction8.DownLeft || input.Direction == Direction8.DownRight);
-                bool prevDown = (Processor.PrevInput.Direction == Direction8.Down || Processor.PrevInput.Direction == Direction8.DownLeft || Processor.PrevInput.Direction == Direction8.DownRight);
+                bool prevDown = (Processor.oldDirection == Direction8.Down || Processor.oldDirection == Direction8.DownLeft || Processor.oldDirection == Direction8.DownRight);
                 bool chooseUp = (input.Direction == Direction8.Up || input.Direction == Direction8.UpLeft || input.Direction == Direction8.UpRight);
-                bool prevUp = (Processor.PrevInput.Direction == Direction8.Up || Processor.PrevInput.Direction == Direction8.UpLeft || Processor.PrevInput.Direction == Direction8.UpRight);
+                bool prevUp = (Processor.oldDirection == Direction8.Up || Processor.oldDirection == Direction8.UpLeft || Processor.oldDirection == Direction8.UpRight);
                 if (chooseDown && (!prevDown || Processor.InputTime >= RenderTime.FromMillisecs(40)))
                 {
                     currentChoice = (currentChoice + 1) % Choices.Count;

@@ -371,7 +371,7 @@ namespace PMDToolkit.Logic.Display {
             {
                 //if no choices are queued
                 if (resultContainers.Count == 0 && askUp)
-                    Logic.Gameplay.Processor.Process();
+                    Gameplay.Processor.Process();
 
                 //then do actual choice queue processing (if choices are now queued)
                 if (resultContainers.Count > 0)

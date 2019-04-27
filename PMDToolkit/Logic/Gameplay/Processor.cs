@@ -51,7 +51,6 @@ namespace PMDToolkit.Logic.Gameplay {
 
         //a distinction must be made between a game command and an interface command
         //key commands: Up, Down, Left, Right, A(Attack), B(Jump), X(Pickup?), Y(Moves?), MouseDown, MouseUp
-        public static Input PrevInput { get; set; }
         public static Input CurrentInput { get; set; }
         public static RenderTime InputTime { get; set; }
 
@@ -88,7 +87,30 @@ namespace PMDToolkit.Logic.Gameplay {
         static bool print;
         static bool allowPrint;
 
-        public static void Init() {
+        public enum InputType : int
+        {
+            Intangible,
+            ShowDebug,
+            Print,
+            RightMouse,
+            LeftMouse,
+            X,
+            C,
+            S,
+            D,
+            Q,
+            Enter,
+            Z,
+            W,
+        };
+
+        public static bool[] InputState = new bool[13];
+
+        private static int OldMouseWheel = 0;
+
+        public static Direction8 oldDirection = Direction8.None;
+
+        public static void Init(Input input) {
             //clean map pointer
             CurrentMapGroup = null;
 
@@ -103,8 +125,8 @@ namespace PMDToolkit.Logic.Gameplay {
                 Inventory[i] = -1;
             }
 
-            PrevInput = new Input();
-            CurrentInput = new Input();
+            //CurrentInput = new Input();
+            CurrentInput = input;
             InputTime = RenderTime.Zero;
             replayInputs = new List<Command>();
             Rand = new Random();
@@ -248,9 +270,9 @@ namespace PMDToolkit.Logic.Gameplay {
             Display.Screen.AddResult(new Results.CurrentMoves(FocusedCharacter.Moves));
         }
 
-        public static void SetFrameInput(Input input, RenderTime elapsedTime, int ups)
+        public static void UpdateInput(RenderTime elapsedTime, int ups)
         {
-            if (input == CurrentInput)
+            if (CurrentInput.InputChanged)
             {
                 InputTime += elapsedTime;
             }
@@ -258,8 +280,6 @@ namespace PMDToolkit.Logic.Gameplay {
             {
                 InputTime = RenderTime.FromMillisecs(0);
             }
-            PrevInput = CurrentInput;
-            CurrentInput = input;
 
             Display.Screen.UpdatesPerSecond = ups;
             ProcessMeta();
@@ -303,34 +323,37 @@ namespace PMDToolkit.Logic.Gameplay {
                 print = true;
             }
             Display.Screen.EndConcurrent();
+            //CurrentInput.Reset();
         }
 
 
         private static void ProcessMeta() {
-            if (CurrentInput.Intangible && !PrevInput.Intangible)
+            if (InputState[(int)InputType.Intangible] != CurrentInput.Intangible)
             {
                 Intangible = !Intangible;
                 Display.Screen.Intangible = Intangible;
+                InputState[(int)InputType.Intangible] = Intangible;
             }
 
-            if (CurrentInput.SpeedDown && !PrevInput.SpeedDown)
+            if (CurrentInput.SpeedDown)
             {
                 if (Display.Screen.DebugSpeed > Display.Screen.GameSpeed.Pause)
                     Display.Screen.DebugSpeed--;
             }
 
-            if (CurrentInput.SpeedUp && !PrevInput.SpeedUp)
+            if (CurrentInput.SpeedUp)
             {
                 if (Display.Screen.DebugSpeed < Display.Screen.GameSpeed.Instant)
                     Display.Screen.DebugSpeed++;
             }
 
-            if (CurrentInput.ShowDebug && !PrevInput.ShowDebug)
+            if (InputState[(int)InputType.ShowDebug] != CurrentInput.ShowDebug)
             {
                 Display.Screen.ShowDebug = !Display.Screen.ShowDebug;
+                InputState[(int)InputType.ShowDebug] = CurrentInput.ShowDebug;
             }
 
-            if (CurrentInput.Print && !PrevInput.Print)
+            if (CurrentInput.Print != InputState[(int)InputType.Print])
             {
                 allowPrint = !allowPrint;
                 Display.Screen.Print = allowPrint;
@@ -338,32 +361,37 @@ namespace PMDToolkit.Logic.Gameplay {
                     Print();
                 else
                     Console.Clear();
+
+                InputState[(int)InputType.Print] = CurrentInput.Print;
             }
 
-            if (CurrentInput.Restart && !PrevInput.Restart)
+            if (CurrentInput.Restart)
             {
                 Restart();
+                CurrentInput.Restart = false;
             }
 
-            if (CurrentInput.MouseWheel != PrevInput.MouseWheel)
+            if (OldMouseWheel != CurrentInput.MouseWheel)
             {
-                int diff = CurrentInput.MouseWheel - PrevInput.MouseWheel;
-                if (diff > Int32.MaxValue / 2)
-                    diff = (PrevInput.MouseWheel - Int32.MinValue) + (Int32.MaxValue - CurrentInput.MouseWheel);
-                else if (diff < Int32.MinValue / 2)
-                    diff = (CurrentInput.MouseWheel - Int32.MinValue) + (Int32.MaxValue - PrevInput.MouseWheel);
+                int diff = CurrentInput.MouseWheel - OldMouseWheel;
+                if (diff > int.MaxValue / 2)
+                    diff = (OldMouseWheel - int.MinValue) + (int.MaxValue - CurrentInput.MouseWheel);
+                else if (diff < int.MinValue / 2)
+                    diff = (CurrentInput.MouseWheel - int.MinValue) + (int.MaxValue - OldMouseWheel);
 
                 Display.Screen.Zoom -= diff;
                 if (Display.Screen.Zoom < Display.Screen.GameZoom.x8Near)
                     Display.Screen.Zoom = Display.Screen.GameZoom.x8Near;
                 if (Display.Screen.Zoom > Display.Screen.GameZoom.x16Far)
                     Display.Screen.Zoom = Display.Screen.GameZoom.x16Far;
+
+                OldMouseWheel = CurrentInput.MouseWheel;
             }
 
             if (Editors.MapEditor.mapEditing)
             {
 
-                if (!CurrentInput.RightMouse && PrevInput.RightMouse && CurrentInput.Shift)
+                if (InputState[(int)InputType.RightMouse] && !CurrentInput.RightMouse && CurrentInput.Shift)
                 {
                     Loc2D coords = Display.Screen.ScreenCoordsToMapCoords(CurrentInput.MouseLoc);
                     if (Operations.IsInBound(CurrentMap.Width, CurrentMap.Height, coords.X, coords.Y))
@@ -389,22 +417,28 @@ namespace PMDToolkit.Logic.Gameplay {
                     {
                         Editors.MapEditor.EyedropTile(Display.Screen.ScreenCoordsToMapCoords(CurrentInput.MouseLoc));
                     }
-                    else if (PrevInput.LeftMouse)
+                    /*else if (InputState[InputType.LeftMouse])
                     {
 
-                    }
+                    }*/
                 }
                 else if (Editors.MapEditor.chosenEditMode == Editors.MapEditor.TileEditMode.Fill)
                 {
-                    if (!CurrentInput.LeftMouse && PrevInput.LeftMouse)
+                    if (!CurrentInput.LeftMouse && InputState[(int)InputType.LeftMouse])
                     {
                         Editors.MapEditor.FillTile(Display.Screen.ScreenCoordsToMapCoords(CurrentInput.MouseLoc), Editors.MapEditor.GetBrush());
                     }
-                    else if (!CurrentInput.RightMouse && PrevInput.RightMouse)
+                    else if (!CurrentInput.RightMouse && InputState[(int)InputType.RightMouse])
                     {
                         Editors.MapEditor.FillTile(Display.Screen.ScreenCoordsToMapCoords(CurrentInput.MouseLoc), new TileAnim());
                     }
                 }
+
+                if (InputState[(int)InputType.RightMouse] != CurrentInput.RightMouse)
+                    InputState[(int)InputType.RightMouse] = CurrentInput.RightMouse;
+
+                if (InputState[(int)InputType.LeftMouse] != CurrentInput.LeftMouse)
+                    InputState[(int)InputType.RightMouse] = CurrentInput.LeftMouse;
             }
         }
 
@@ -453,14 +487,14 @@ namespace PMDToolkit.Logic.Gameplay {
 #endif
                 //multi-button presses
             if (CurrentInput[Input.InputType.A]) {
-                if (CurrentInput[Input.InputType.S] && !PrevInput[Input.InputType.S]) {
-                    command = new Logic.Gameplay.Command(Logic.Gameplay.Command.CommandType.Spell, 0);
-                } else if (CurrentInput[Input.InputType.D] && !PrevInput[Input.InputType.D]) {
-                    command = new Logic.Gameplay.Command(Logic.Gameplay.Command.CommandType.Spell, 1);
-                } else if (CurrentInput[Input.InputType.X] && !PrevInput[Input.InputType.X]) {
-                    command = new Logic.Gameplay.Command(Logic.Gameplay.Command.CommandType.Spell, 2);
-                } else if (CurrentInput[Input.InputType.C] && !PrevInput[Input.InputType.C]) {
-                    command = new Logic.Gameplay.Command(Logic.Gameplay.Command.CommandType.Spell, 3);
+                if (CurrentInput[Input.InputType.S] && !InputState[(int)InputType.S]) {
+                    command = new Command(Command.CommandType.Spell, 0);
+                } else if (CurrentInput[Input.InputType.D] && !InputState[(int)InputType.D]) {
+                    command = new Command(Command.CommandType.Spell, 1);
+                } else if (CurrentInput[Input.InputType.X] && !InputState[(int)InputType.X]) {
+                    command = new Command(Command.CommandType.Spell, 2);
+                } else if (CurrentInput[Input.InputType.C] && !InputState[(int)InputType.C]) {
+                    command = new Command(Command.CommandType.Spell, 3);
                 } else {
                     //keep move display
 #if GAME_MODE
@@ -483,7 +517,7 @@ namespace PMDToolkit.Logic.Gameplay {
                 }
 
                 //single button presses
-                if (CurrentInput[Input.InputType.X] && !PrevInput[Input.InputType.X]) {
+                if (CurrentInput[Input.InputType.X] && !InputState[(int)InputType.X]) {
                     if (jump) {
                         command = new Command(Command.CommandType.AltAttack);
                         command.AddArg((int)character.CharDir);
@@ -494,7 +528,7 @@ namespace PMDToolkit.Logic.Gameplay {
                     jump = false;
                     turn = false;
                     diagonal = false;
-                } else if (CurrentInput[Input.InputType.C] && !PrevInput[Input.InputType.C]) {
+                } else if (CurrentInput[Input.InputType.C] && !InputState[(int)InputType.C]) {
                     if (jump) {
                         command = new Command(Command.CommandType.Wait);
                     } else {
@@ -505,12 +539,12 @@ namespace PMDToolkit.Logic.Gameplay {
                     diagonal = false;
                 }//directions
                 else if (CurrentInput.Direction != Direction8.None) {
-                    if (Display.Screen.DebugSpeed != Display.Screen.GameSpeed.Instant || PrevInput.Direction == Direction8.None)
+                    if (Display.Screen.DebugSpeed != Display.Screen.GameSpeed.Instant || oldDirection == Direction8.None)
                     {
                         Command.CommandType cmdType = Command.CommandType.None;
                         if (Operations.IsDiagonal(CurrentInput.Direction))
                             cmdType = Command.CommandType.Dir;
-                        else if (InputTime > RenderTime.FromMillisecs(20) || PrevInput.Direction == Direction8.None)
+                        else if (InputTime > RenderTime.FromMillisecs(20) || oldDirection == Direction8.None)
                             cmdType = Command.CommandType.Dir;
                         if (InputTime > RenderTime.FromMillisecs(60) || Display.Screen.DebugSpeed == Display.Screen.GameSpeed.Instant) cmdType = Command.CommandType.Move;
                         if (jump) cmdType = Command.CommandType.AltAttack;
@@ -527,9 +561,38 @@ namespace PMDToolkit.Logic.Gameplay {
                             diagonal = false;
                         }
                     }
+
+                    if (oldDirection != CurrentInput.Direction)
+                        oldDirection = CurrentInput.Direction;
                 }
             }
 
+            if (InputState[(int)InputType.X] != CurrentInput[Input.InputType.X])
+                InputState[(int)InputType.X] = CurrentInput[Input.InputType.X];
+
+            if (InputState[(int)InputType.C] != CurrentInput[Input.InputType.C])
+                InputState[(int)InputType.C] = CurrentInput[Input.InputType.C];
+
+            if (InputState[(int)InputType.S] != CurrentInput[Input.InputType.S])
+                InputState[(int)InputType.S] = CurrentInput[Input.InputType.S];
+
+            if (InputState[(int)InputType.D] != CurrentInput[Input.InputType.D])
+                InputState[(int)InputType.D] = CurrentInput[Input.InputType.D];
+
+            if (InputState[(int)InputType.Q] != CurrentInput[Input.InputType.Q])
+                InputState[(int)InputType.Q] = CurrentInput[Input.InputType.Q];
+
+            if (InputState[(int)InputType.Z] != CurrentInput[Input.InputType.Z])
+                InputState[(int)InputType.Z] = CurrentInput[Input.InputType.Z];
+
+            /*if (InputState[(int)InputType.A] != CurrentInput[Input.InputType.A])
+                InputState[(int)InputType.A] = CurrentInput[Input.InputType.A];*/
+
+            if (InputState[(int)InputType.W] != CurrentInput[Input.InputType.W])
+                InputState[(int)InputType.W] = CurrentInput[Input.InputType.W];
+
+            if (InputState[(int)InputType.Enter] != CurrentInput[Input.InputType.Enter])
+                InputState[(int)InputType.Enter] = CurrentInput[Input.InputType.Enter];
 #if GAME_MODE
             Display.Screen.Jump = jump;
             Display.Screen.Spell = spell;
@@ -538,6 +601,7 @@ namespace PMDToolkit.Logic.Gameplay {
 #endif
             ProcessDecision(command, character, ref moveMade);
         }
+
 
         //the intention, and its result to that frame
         //"choose the action to partake in"

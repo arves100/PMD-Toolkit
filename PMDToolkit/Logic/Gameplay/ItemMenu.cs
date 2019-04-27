@@ -46,7 +46,7 @@ namespace PMDToolkit.Logic.Gameplay {
         }
 
         public override void Process(Input input, ActiveChar character, ref bool moveMade) {
-            if (input[Input.InputType.Q] && !Processor.PrevInput[Input.InputType.Q]) {
+            if (input[Input.InputType.Q] && !Processor.InputState[(int)Processor.InputType.Q]) {
                 MenuManager.Menus.RemoveAt(0);
             } else {
                 base.Process(input, character, ref moveMade);
